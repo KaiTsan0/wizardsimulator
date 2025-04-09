@@ -12,6 +12,8 @@ public class BuildingSystem : MonoBehaviour
     private float currentHeight = 0f;
     private int currentRotationStep = 0; // Current rotation step (in increments of 90 degrees)
 
+    private bool isInNoBuildZone = false; // Tracks whether the ghost plane is in a no-build zone
+
     void Start()
     {
         // Initialize the ghost plane only if the first prefab is not null
@@ -51,7 +53,7 @@ public class BuildingSystem : MonoBehaviour
             currentRotationStep++;
             if (currentRotationStep >= 4) currentRotationStep -= 4; // Wrap around to 0 degrees
         }
-
+        
         // Position the ghost plane only if a valid prefab is selected
         if (planePrefabs.Length > 0 && planePrefabs[selectedPlaneIndex] != null)
         {
@@ -71,11 +73,122 @@ public class BuildingSystem : MonoBehaviour
                 Quaternion playerRotation = Quaternion.Euler(0, 0, currentRotationStep * 90f);
                 ghostPlaneInstance.transform.rotation = baseRotation * playerRotation;
 
+                // Check if the ghost plane is in a no-build zone
+                CheckNoBuildZone();
+
                 // Place a plane on left mouse click
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && !isInNoBuildZone)
                 {
                     PlacePlane(snappedPosition, ghostPlaneInstance.transform.rotation);
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if the ghost plane is overlapping with any no-build zones
+    /// </summary>
+    void CheckNoBuildZone()
+    {
+        // Get the ghost plane's MeshCollider
+        MeshCollider meshCollider = ghostPlaneInstance.GetComponent<MeshCollider>();
+        if (meshCollider == null || meshCollider.sharedMesh == null)
+        {
+            Debug.LogWarning("Ghost plane does not have a valid MeshCollider.");
+            return;
+        }
+
+        // Find all no-build zone colliders
+        Collider[] noBuildZones = Physics.OverlapSphere(ghostPlaneInstance.transform.position, 10f, LayerMask.GetMask("NoBuildZone"));
+
+        bool foundNoBuildZone = false;
+
+        foreach (Collider noBuildZone in noBuildZones)
+        {
+            Vector3 direction;
+            float distance;
+
+            if (Physics.ComputePenetration(
+                meshCollider,
+                ghostPlaneInstance.transform.position,
+                ghostPlaneInstance.transform.rotation,
+                noBuildZone,
+                noBuildZone.transform.position,
+                noBuildZone.transform.rotation,
+                out direction,
+                out distance
+            ))
+            {
+                foundNoBuildZone = true;
+                break;
+            }
+        }
+
+        // Update the ghost plane material based on whether it's in a no-build zone
+        if (foundNoBuildZone)
+        {
+            if (!isInNoBuildZone)
+            {
+                ApplyNoBuildMaterial();
+                isInNoBuildZone = true;
+            }
+        }
+        else
+        {
+            if (isInNoBuildZone)
+            {
+                ApplyGhostMaterial();
+                isInNoBuildZone = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Applies the "NoBuildMaterial" to the ghost plane
+    /// </summary>
+    void ApplyNoBuildMaterial()
+    {
+        Renderer renderer = ghostPlaneInstance.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            Material noBuildMaterial = Resources.Load<Material>("NoBuildMaterial"); // Load the no-build material
+            if (noBuildMaterial != null)
+            {
+                Material[] materials = renderer.materials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    materials[i] = noBuildMaterial;
+                }
+                renderer.materials = materials;
+            }
+            else
+            {
+                Debug.LogError("NoBuildMaterial not found! Please ensure the material is in the Resources folder.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Applies the "GhostMaterial" to the ghost plane
+    /// </summary>
+    void ApplyGhostMaterial()
+    {
+        Renderer renderer = ghostPlaneInstance.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            Material ghostMaterial = Resources.Load<Material>("GhostMaterial"); // Load the ghost material
+            if (ghostMaterial != null)
+            {
+                Material[] materials = renderer.materials;
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    materials[i] = ghostMaterial;
+                }
+                renderer.materials = materials;
+            }
+            else
+            {
+                Debug.LogError("GhostMaterial not found! Please ensure the material is in the Resources folder.");
             }
         }
     }
@@ -180,7 +293,20 @@ public class BuildingSystem : MonoBehaviour
             Collider collider = ghostPlaneInstance.GetComponent<Collider>();
             if (collider != null)
             {
-                collider.enabled = false;
+                collider.isTrigger = true;
+            }
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (ghostPlaneInstance != null)
+        {
+            Collider collider = ghostPlaneInstance.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireCube(collider.bounds.center, collider.bounds.size);
             }
         }
     }
