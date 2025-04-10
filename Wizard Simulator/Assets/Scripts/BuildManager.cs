@@ -3,7 +3,8 @@ using UnityEngine;
 public enum BuildMode
 {
     SelectMode,
-    BuildMode
+    BuildMode,
+    MoveMode
 }
 public class BuildManager : MonoBehaviour
 {
@@ -27,5 +28,10 @@ public class BuildManager : MonoBehaviour
     public bool IsInSelectMode()
     {
         return currentMode == BuildMode.SelectMode;
+    }
+
+    public bool IsInMoveMode()
+    {
+        return currentMode == BuildMode.MoveMode;
     }
 }

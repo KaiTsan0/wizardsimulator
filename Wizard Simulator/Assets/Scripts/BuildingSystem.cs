@@ -15,7 +15,9 @@ public class BuildingSystem : MonoBehaviour
 
     private bool isInNoBuildZone = false; // Tracks whether the ghost plane is in a no-build zone
 
-    private GameObject currentlySelectedObject;
+    public GameObject currentlySelectedObject;
+
+    [SerializeField]private GameObject currentlyHoveredObject;
 
     public BuildManager buildManager;
 
@@ -78,7 +80,7 @@ public class BuildingSystem : MonoBehaviour
         // Position the ghost plane only if a valid prefab is selected
         if (planePrefabs.Length > 0 && planePrefabs[selectedPlaneIndex] != null)
         {
-            if (buildManager.IsInBuildMode())
+            if (buildManager.IsInBuildMode() || buildManager.IsInMoveMode())
             {
                 // Check if the pointer is over a UI element
                 if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -114,12 +116,39 @@ public class BuildingSystem : MonoBehaviour
             }
             
         }
+
+        if (buildManager.IsInSelectMode() && currentlyHoveredObject != null)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                currentlySelectedObject = currentlyHoveredObject;
+                buildManager.SetBuildMode(BuildMode.MoveMode);
+                SelectPlaneByName(currentlySelectedObject.name.Replace("(Clone)", "").Trim());
+            }
+        }
     }
 
     public void SetSelectMode()
     {
         SelectPlane(0); // Set selectedPlaneIndex to 0 (no selection)
-        buildManager.SetBuildMode(BuildMode.SelectMode); 
+        buildManager.SetBuildMode(BuildMode.SelectMode);
+
+        if (currentlyHoveredObject != null)
+        {
+            Outline previousOutline = currentlyHoveredObject.GetComponent<Outline>();
+            if (previousOutline != null)
+            {
+                previousOutline.enabled = false;
+            }
+
+            // Clear the reference to the currently selected object
+            currentlyHoveredObject = null;
+        }
+
+        if (currentlySelectedObject != null)
+        {
+            currentlySelectedObject = null;
+        }
     }
 
     void HandleSelectModeRaycast()
@@ -139,12 +168,12 @@ public class BuildingSystem : MonoBehaviour
                 GameObject hitObject = hit.collider.gameObject;
 
                 // If the hit object is different from the currently selected object
-                if (currentlySelectedObject != hitObject)
+                if (currentlyHoveredObject != hitObject)
                 {
                     // Disable the outline on the previously selected object
-                    if (currentlySelectedObject != null)
+                    if (currentlyHoveredObject != null)
                     {
-                        Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                        Outline previousOutline = currentlyHoveredObject.GetComponent<Outline>();
                         if (previousOutline != null)
                         {
                             previousOutline.enabled = false;
@@ -152,7 +181,7 @@ public class BuildingSystem : MonoBehaviour
                     }
 
                     // Set the new currently selected object
-                    currentlySelectedObject = hitObject;
+                    currentlyHoveredObject = hitObject;
 
                     // Access the Outline component on the hit object
                     Outline outline = hitObject.GetComponent<Outline>();
@@ -170,32 +199,32 @@ public class BuildingSystem : MonoBehaviour
             else
             {
                 // If no valid object is hit, disable the outline on the currently selected object
-                if (currentlySelectedObject != null)
+                if (currentlyHoveredObject != null)
                 {
-                    Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                    Outline previousOutline = currentlyHoveredObject.GetComponent<Outline>();
                     if (previousOutline != null)
                     {
                         previousOutline.enabled = false;
                     }
 
                     // Clear the reference to the currently selected object
-                    currentlySelectedObject = null;
+                    currentlyHoveredObject = null;
                 }
             }
         }
         else
         {
             // If no object is hit, disable the outline on the currently selected object
-            if (currentlySelectedObject != null)
+            if (currentlyHoveredObject != null)
             {
-                Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                Outline previousOutline = currentlyHoveredObject.GetComponent<Outline>();
                 if (previousOutline != null)
                 {
                     previousOutline.enabled = false;
                 }
 
                 // Clear the reference to the currently selected object
-                currentlySelectedObject = null;
+                currentlyHoveredObject = null;
             }
         }
     }
@@ -331,40 +360,85 @@ public class BuildingSystem : MonoBehaviour
             // Instantiate the plane and set its parent to "PlacedPlanes"
             GameObject placedPlane = Instantiate(planePrefabs[selectedPlaneIndex], position, rotation);
             placedPlane.transform.parent = placedPlanesParent.transform;
+
+            // remove money here
+
+            if (buildManager.IsInMoveMode())
+            {
+                buildManager.SetBuildMode(BuildMode.SelectMode);
+                Destroy(currentlySelectedObject);
+            }
         }
     }
 
     public void SelectPlane(int index)
     {
-        buildManager.SetBuildMode(BuildMode.BuildMode);
-
-        if (index >= 0 && index < planePrefabs.Length)
+        if (!buildManager.IsInMoveMode())
         {
-            if(selectedPlaneIndex == index && 0 != index)
-            {
-                SetSelectMode();
-                return;
-            }
-            selectedPlaneIndex = index;
+            buildManager.SetBuildMode(BuildMode.BuildMode);
 
-            // Update the ghost plane only if the selected prefab is not null
-            if (planePrefabs[selectedPlaneIndex] != null)
+            if (index >= 0 && index < planePrefabs.Length)
             {
-                CreateGhostPlane(planePrefabs[selectedPlaneIndex]);
-            }
-            else
-            {
-                // Destroy the ghost plane if no prefab is selected
-                if (ghostPlaneInstance != null)
+                if (selectedPlaneIndex == index && 0 != index)
                 {
-                    Destroy(ghostPlaneInstance);
-                    ghostPlaneInstance = null;
+                    SetSelectMode();
+                    return;
                 }
-            }
+                selectedPlaneIndex = index;
 
-            // Reset the rotation step when switching planes
-            currentRotationStep = 0;
+                // Update the ghost plane only if the selected prefab is not null
+                if (planePrefabs[selectedPlaneIndex] != null)
+                {
+                    CreateGhostPlane(planePrefabs[selectedPlaneIndex]);
+                }
+                else
+                {
+                    // Destroy the ghost plane if no prefab is selected
+                    if (ghostPlaneInstance != null)
+                    {
+                        Destroy(ghostPlaneInstance);
+                        ghostPlaneInstance = null;
+                    }
+                }
+
+                // Reset the rotation step when switching planes
+                currentRotationStep = 0;
+            }
         }
+        else
+        {
+            Debug.Log("MOVE MODE");
+
+            if (index >= 0 && index < planePrefabs.Length)
+            {
+                if (selectedPlaneIndex == index && 0 != index)
+                {
+                    SetSelectMode();
+                    return;
+                }
+                /*selectedPlaneIndex = index;
+
+                // Update the ghost plane only if the selected prefab is not null
+                if (planePrefabs[selectedPlaneIndex] != null)
+                {
+                    CreateGhostPlane(planePrefabs[selectedPlaneIndex]);
+                    
+                }
+                else
+                {
+                    // Destroy the ghost plane if no prefab is selected
+                    if (ghostPlaneInstance != null)
+                    {
+                        Destroy(ghostPlaneInstance);
+                        ghostPlaneInstance = null;
+                    }
+                }
+
+                // Reset the rotation step when switching planes
+                currentRotationStep = 0;*/
+            }
+        }
+        
     }
 
     /// <summary>
@@ -387,6 +461,7 @@ public class BuildingSystem : MonoBehaviour
         Debug.LogWarning($"No plane prefab found with the name: {planeName}");
     }
 
+
     void CreateGhostPlane(GameObject prefab)
     {
         // Destroy the existing ghost plane if it exists
@@ -399,6 +474,7 @@ public class BuildingSystem : MonoBehaviour
         if (prefab != null)
         {
             ghostPlaneInstance = Instantiate(prefab);
+            
 
             // Assign the custom ghost material to the ghost plane
             Renderer renderer = ghostPlaneInstance.GetComponent<Renderer>();
