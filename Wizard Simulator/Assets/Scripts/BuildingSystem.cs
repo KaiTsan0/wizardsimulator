@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BuildingSystem : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class BuildingSystem : MonoBehaviour
 
     private bool isInNoBuildZone = false; // Tracks whether the ghost plane is in a no-build zone
 
+    private GameObject currentlySelectedObject;
+
+    public BuildManager buildManager;
+
     void Start()
     {
         // Initialize the ghost plane only if the first prefab is not null
@@ -21,6 +26,16 @@ public class BuildingSystem : MonoBehaviour
         {
             CreateGhostPlane(planePrefabs[selectedPlaneIndex]);
         }
+
+        // Get the BuildManager from the BuildCam GameObject
+        buildManager = FindObjectOfType<BuildManager>();
+
+        if (buildManager == null)
+        {
+            Debug.LogError("BuildManager not found! Please ensure it is attached to the BuildCam GameObject.");
+        }
+
+        SetSelectMode();
     }
 
     void Update()
@@ -28,7 +43,7 @@ public class BuildingSystem : MonoBehaviour
         // Check if the Escape key is pressed
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            SelectPlane(0); // Set selectedPlaneIndex to 0 (no selection)
+            SetSelectMode();
             return; // Exit early to avoid unnecessary processing
         }
 
@@ -53,34 +68,115 @@ public class BuildingSystem : MonoBehaviour
             currentRotationStep++;
             if (currentRotationStep >= 4) currentRotationStep -= 4; // Wrap around to 0 degrees
         }
-        
+
+        if (buildManager.IsInSelectMode())
+        {
+            // Shoot a ray and handle interactions with PlayerPlaced objects
+            HandleSelectModeRaycast();
+        }
+
         // Position the ghost plane only if a valid prefab is selected
         if (planePrefabs.Length > 0 && planePrefabs[selectedPlaneIndex] != null)
         {
-            RaycastHit hit;
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, floorLayer))
+            if (buildManager.IsInBuildMode())
             {
-                Vector3 snappedPosition = SnapToGrid(hit.point, gridSize);
-                snappedPosition.y += currentHeight; // Adjust height
-
-                // Update ghost plane position and rotation
-                ghostPlaneInstance.transform.position = snappedPosition;
-
-                // Combine the prefab's original rotation with the player-applied rotation
-                Quaternion baseRotation = planePrefabs[selectedPlaneIndex].transform.rotation;
-                Quaternion playerRotation = Quaternion.Euler(0, 0, currentRotationStep * 90f);
-                ghostPlaneInstance.transform.rotation = baseRotation * playerRotation;
-
-                // Check if the ghost plane is in a no-build zone
-                CheckNoBuildZone();
-
-                // Place a plane on left mouse click
-                if (Input.GetMouseButtonDown(0) && !isInNoBuildZone)
+                // Check if the pointer is over a UI element
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 {
-                    PlacePlane(snappedPosition, ghostPlaneInstance.transform.rotation);
+                    return; // Skip raycasting if the pointer is over a UI element
                 }
+
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity, floorLayer))
+                {
+                    Vector3 snappedPosition = SnapToGrid(hit.point, gridSize);
+                    snappedPosition.y += currentHeight; // Adjust height
+
+                    // Update ghost plane position and rotation
+                    ghostPlaneInstance.transform.position = snappedPosition;
+
+                    // Combine the prefab's original rotation with the player-applied rotation
+                    Quaternion baseRotation = planePrefabs[selectedPlaneIndex].transform.rotation;
+                    Quaternion playerRotation = Quaternion.Euler(0, 0, currentRotationStep * 90f);
+                    ghostPlaneInstance.transform.rotation = baseRotation * playerRotation;
+
+                    // Check if the ghost plane is in a no-build zone
+                    CheckNoBuildZone();
+
+                    // Place a plane on left mouse click
+                    if (Input.GetMouseButtonDown(0) && !isInNoBuildZone)
+                    {
+                        PlacePlane(snappedPosition, ghostPlaneInstance.transform.rotation);
+                    }
+                }
+            }
+            
+        }
+    }
+
+    public void SetSelectMode()
+    {
+        SelectPlane(0); // Set selectedPlaneIndex to 0 (no selection)
+        buildManager.SetBuildMode(BuildMode.SelectMode); 
+    }
+
+    void HandleSelectModeRaycast()
+    {
+        // Perform a raycast from the camera through the mouse position
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            // Check if the hit object has the "PlayerPlaced" tag
+            if (hit.collider.CompareTag("PlayerPlaced"))
+            {
+                // Get the GameObject that was hit
+                GameObject hitObject = hit.collider.gameObject;
+
+                // If the hit object is different from the currently selected object
+                if (currentlySelectedObject != hitObject)
+                {
+                    // Disable the outline on the previously selected object
+                    if (currentlySelectedObject != null)
+                    {
+                        Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                        if (previousOutline != null)
+                        {
+                            previousOutline.enabled = false;
+                        }
+                    }
+
+                    // Set the new currently selected object
+                    currentlySelectedObject = hitObject;
+
+                    // Access the Outline component on the hit object
+                    Outline outline = hitObject.GetComponent<Outline>();
+
+                    // If the object doesn't have an Outline component, add one
+                    if (outline == null)
+                    {
+                        outline = hitObject.AddComponent<Outline>();
+                    }
+
+                    // Enable the outline on the currently selected object
+                    outline.enabled = true;
+                }
+            }
+        }
+        else
+        {
+            // If no object is hit, disable the outline on the currently selected object
+            if (currentlySelectedObject != null)
+            {
+                Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                if (previousOutline != null)
+                {
+                    previousOutline.enabled = false;
+                }
+
+                // Clear the reference to the currently selected object
+                currentlySelectedObject = null;
             }
         }
     }
@@ -206,14 +302,30 @@ public class BuildingSystem : MonoBehaviour
         // Instantiate the selected plane prefab only if it's not null
         if (selectedPlaneIndex >= 0 && selectedPlaneIndex < planePrefabs.Length && planePrefabs[selectedPlaneIndex] != null)
         {
-            Instantiate(planePrefabs[selectedPlaneIndex], position, rotation);
+            // Check if the "PlacedPlanes" parent object exists; if not, create it
+            GameObject placedPlanesParent = GameObject.Find("PlacedPlanes");
+            if (placedPlanesParent == null)
+            {
+                placedPlanesParent = new GameObject("PlacedPlanes");
+            }
+
+            // Instantiate the plane and set its parent to "PlacedPlanes"
+            GameObject placedPlane = Instantiate(planePrefabs[selectedPlaneIndex], position, rotation);
+            placedPlane.transform.parent = placedPlanesParent.transform;
         }
     }
 
     public void SelectPlane(int index)
     {
+        buildManager.SetBuildMode(BuildMode.BuildMode);
+
         if (index >= 0 && index < planePrefabs.Length)
         {
+            if(selectedPlaneIndex == index && 0 != index)
+            {
+                SetSelectMode();
+                return;
+            }
             selectedPlaneIndex = index;
 
             // Update the ghost plane only if the selected prefab is not null
@@ -294,6 +406,17 @@ public class BuildingSystem : MonoBehaviour
             if (collider != null)
             {
                 collider.isTrigger = true;
+                
+            }
+
+            Transform noBuildZoneChild = ghostPlaneInstance.transform.Find("NoBuildZoneChild");
+            if (noBuildZoneChild != null)
+            {
+                noBuildZoneChild.gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("No child object named 'NoBuildZone' found in the ghost plane prefab.");
             }
         }
     }

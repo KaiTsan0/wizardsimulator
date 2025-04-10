@@ -78,14 +78,14 @@ public class PlayerManager : MonoBehaviour
         // Activate/Deactivate the Player GameObject
         if (playerGameObject != null)
         {
-            buildingSystem.SelectPlane(0); // Deselect any plane
+            buildingSystem.SetSelectMode(); // Deselect any plane
             playerGameObject.SetActive(!isInBuildMode);
         }
 
         // Activate/Deactivate the Build Cam Camera
         if (buildCamCamera != null)
         {
-            buildingSystem.SelectPlane(0); // Deselect any plane
+            buildingSystem.SetSelectMode(); // Deselect any plane
             buildCamCamera.SetActive(isInBuildMode);
         }
 
