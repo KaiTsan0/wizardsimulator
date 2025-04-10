@@ -42,6 +42,11 @@ public class BuildingSystem : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            Camera.main.cullingMask ^= 1 << LayerMask.NameToLayer("NoBuildZone");
+        }
+
         // Check if the Escape key is pressed
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -124,6 +129,16 @@ public class BuildingSystem : MonoBehaviour
                 currentlySelectedObject = currentlyHoveredObject;
                 buildManager.SetBuildMode(BuildMode.MoveMode);
                 SelectPlaneByName(currentlySelectedObject.name.Replace("(Clone)", "").Trim());
+
+                Transform noBuildZoneChild = currentlySelectedObject.transform.Find("NoBuildZoneChild");
+                if (noBuildZoneChild != null)
+                {
+                    noBuildZoneChild.gameObject.SetActive(false);
+                }
+                else
+                {
+                    Debug.LogWarning("No child object named 'NoBuildZone' found in the ghost plane prefab.");
+                }
             }
         }
     }
@@ -147,6 +162,16 @@ public class BuildingSystem : MonoBehaviour
 
         if (currentlySelectedObject != null)
         {
+            Transform noBuildZoneChild = currentlySelectedObject.transform.Find("NoBuildZoneChild");
+            if (noBuildZoneChild != null)
+            {
+                noBuildZoneChild.gameObject.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("No child object named 'NoBuildZone' found in the ghost plane prefab.");
+            }
+
             currentlySelectedObject = null;
         }
     }
@@ -416,13 +441,13 @@ public class BuildingSystem : MonoBehaviour
                     SetSelectMode();
                     return;
                 }
-                /*selectedPlaneIndex = index;
+
+                selectedPlaneIndex = index;
 
                 // Update the ghost plane only if the selected prefab is not null
                 if (planePrefabs[selectedPlaneIndex] != null)
                 {
                     CreateGhostPlane(planePrefabs[selectedPlaneIndex]);
-                    
                 }
                 else
                 {
@@ -435,7 +460,7 @@ public class BuildingSystem : MonoBehaviour
                 }
 
                 // Reset the rotation step when switching planes
-                currentRotationStep = 0;*/
+                currentRotationStep = 0;
             }
         }
         
@@ -448,6 +473,27 @@ public class BuildingSystem : MonoBehaviour
     /// <param name="planeName">The name of the plane prefab to select.</param>
     public void SelectPlaneByName(string planeName)
     {
+        if (buildManager.IsInMoveMode())
+        {
+            if(planeName == currentlySelectedObject.name.Replace("(Clone)", "").Trim())
+            {
+                for (int i = 0; i < planePrefabs.Length; i++)
+                {
+                    if (planePrefabs[i] != null && planePrefabs[i].name == planeName)
+                    {
+                        SelectPlane(i); // Call the existing SelectPlane method
+                        Debug.Log($"Selected plane: {planeName}");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                return;
+            }
+            
+        }
+
         for (int i = 0; i < planePrefabs.Length; i++)
         {
             if (planePrefabs[i] != null && planePrefabs[i].name == planeName)

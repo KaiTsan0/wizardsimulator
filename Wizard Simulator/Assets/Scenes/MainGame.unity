@@ -502,7 +502,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 63
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -609,6 +609,8 @@ MonoBehaviour:
     m_Bits: 8
   gridSize: 0.5
   heightIncrement: 0.125
+  currentlySelectedObject: {fileID: 0}
+  currentlyHoveredObject: {fileID: 0}
   buildManager: {fileID: 330585550}
 --- !u!114 &330585550
 MonoBehaviour:
