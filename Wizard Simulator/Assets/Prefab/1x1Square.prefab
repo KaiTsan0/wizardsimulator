@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 2875028336935880666}
   m_Layer: 0
   m_Name: 1x1Square
-  m_TagString: Placed
+  m_TagString: PlayerPlaced
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - NoBuildZone
+  - PlayerPlaced
+  - Placed
   layers:
   - Default
   - TransparentFX

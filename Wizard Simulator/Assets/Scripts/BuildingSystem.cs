@@ -124,9 +124,13 @@ public class BuildingSystem : MonoBehaviour
 
     void HandleSelectModeRaycast()
     {
-        // Perform a raycast from the camera through the mouse position
+        // Create a layer mask that excludes the "NoBuildZone" layer
+        int noBuildZoneLayer = LayerMask.NameToLayer("NoBuildZone");
+        int layerMask = ~(1 << noBuildZoneLayer); // Exclude the NoBuildZone layer
+
+        // Perform a raycast from the camera through the mouse position, using the layer mask
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
         {
             // Check if the hit object has the "PlayerPlaced" tag
             if (hit.collider.CompareTag("PlayerPlaced"))
@@ -161,6 +165,21 @@ public class BuildingSystem : MonoBehaviour
 
                     // Enable the outline on the currently selected object
                     outline.enabled = true;
+                }
+            }
+            else
+            {
+                // If no valid object is hit, disable the outline on the currently selected object
+                if (currentlySelectedObject != null)
+                {
+                    Outline previousOutline = currentlySelectedObject.GetComponent<Outline>();
+                    if (previousOutline != null)
+                    {
+                        previousOutline.enabled = false;
+                    }
+
+                    // Clear the reference to the currently selected object
+                    currentlySelectedObject = null;
                 }
             }
         }
