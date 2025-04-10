@@ -612,6 +612,7 @@ MonoBehaviour:
   currentlySelectedObject: {fileID: 0}
   currentlyHoveredObject: {fileID: 0}
   buildManager: {fileID: 330585550}
+  playerManager: {fileID: 0}
 --- !u!114 &330585550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1850,7 +1851,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xA30.00"
+  m_text: "\xA30.71"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1993,7 +1994,7 @@ MonoBehaviour:
   playerGameObject: {fileID: 4459864850698372450}
   buildCamCamera: {fileID: 330585543}
   buildingSystem: {fileID: 330585549}
-  money: 0
+  money: 0.71
   moneyTextValue: {fileID: 1237574867}
 --- !u!114 &1359948596
 MonoBehaviour:

@@ -21,6 +21,10 @@ public class BuildingSystem : MonoBehaviour
 
     public BuildManager buildManager;
 
+    public PlayerManager playerManager;
+
+    //public bool CanAffordPlacement;
+
     void Start()
     {
         // Initialize the ghost plane only if the first prefab is not null
@@ -35,6 +39,13 @@ public class BuildingSystem : MonoBehaviour
         if (buildManager == null)
         {
             Debug.LogError("BuildManager not found! Please ensure it is attached to the BuildCam GameObject.");
+        }
+
+        playerManager = FindObjectOfType<PlayerManager>();
+
+        if (playerManager == null)
+        {
+            Debug.LogError("PlayerManager not found! Please ensure it is attached to the BuildCam GameObject.");
         }
 
         SetSelectMode();
@@ -112,10 +123,29 @@ public class BuildingSystem : MonoBehaviour
                     // Check if the ghost plane is in a no-build zone
                     CheckNoBuildZone();
 
-                    // Place a plane on left mouse click
-                    if (Input.GetMouseButtonDown(0) && !isInNoBuildZone)
+                    PlaceableObject placeableObject = planePrefabs[selectedPlaneIndex].GetComponent<PlaceableObject>();
+                    if (placeableObject != null)
                     {
-                        PlacePlane(snappedPosition, ghostPlaneInstance.transform.rotation);
+                        // Access the PlaceableData
+                        PlaceableData placeableData = placeableObject.placeableData;
+
+                        // Example: Check if the player has enough resources
+                        if (CanAffordPlacement(placeableData) || buildManager.IsInMoveMode())
+                        {
+                            if (Input.GetMouseButtonDown(0) && !isInNoBuildZone)
+                            {
+                                PlacePlane(snappedPosition, ghostPlaneInstance.transform.rotation);
+                                if (buildManager.IsInBuildMode()) 
+                                { 
+                                    DeductMoney(placeableData); 
+                                }
+                            }                           
+                        }
+                        else
+                        {
+                            Debug.Log("Not enough resources to place this object!");
+                            ApplyNoBuildMaterial();
+                        }
                     }
                 }
             }
@@ -375,6 +405,7 @@ public class BuildingSystem : MonoBehaviour
         // Instantiate the selected plane prefab only if it's not null
         if (selectedPlaneIndex >= 0 && selectedPlaneIndex < planePrefabs.Length && planePrefabs[selectedPlaneIndex] != null)
         {
+
             // Check if the "PlacedPlanes" parent object exists; if not, create it
             GameObject placedPlanesParent = GameObject.Find("PlacedPlanes");
             if (placedPlanesParent == null)
@@ -392,6 +423,7 @@ public class BuildingSystem : MonoBehaviour
             {
                 buildManager.SetBuildMode(BuildMode.SelectMode);
                 Destroy(currentlySelectedObject);
+                return;
             }
         }
     }
@@ -573,5 +605,31 @@ public class BuildingSystem : MonoBehaviour
                 Gizmos.DrawWireCube(collider.bounds.center, collider.bounds.size);
             }
         }
+    }
+
+    bool CanAffordPlacement(PlaceableData placeableData)
+    {
+        // Replace with your resource management logic
+        float playerMoney = GetPlayerResources();
+        return playerMoney >= placeableData.cost;
+    }
+
+    float GetPlayerResources()
+    {
+        // Replace with actual resource retrieval logic
+        return playerManager.Money; // Example value
+    }
+    void DeductMoney(PlaceableData placeableData)
+    {
+        // Replace with your resource management logic
+        float playerMoney = GetPlayerResources();
+        SetPlayerResources(playerMoney - placeableData.cost);
+    }
+
+    void SetPlayerResources(float newMoneyValue)
+    {
+        // Replace with actual resource update logic
+        Debug.Log($"Player resources updated to: {newMoneyValue}");
+        playerManager.Money = newMoneyValue;
     }
 }

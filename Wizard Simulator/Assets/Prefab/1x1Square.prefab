@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 3852244011286813959}
   - component: {fileID: 6011996363934085516}
   - component: {fileID: 2875028336935880666}
+  - component: {fileID: 2460250199694165841}
   m_Layer: 0
   m_Name: 1x1Square
   m_TagString: PlayerPlaced
@@ -162,6 +163,19 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
+--- !u!114 &2460250199694165841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582215399220639039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e17c465271545f4ab3ca854cdc38742, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placeableData: {fileID: 11400000, guid: ec3990f77443ab949a7657bc10dcb689, type: 2}
 --- !u!1 &3198412609113105592
 GameObject:
   m_ObjectHideFlags: 0
