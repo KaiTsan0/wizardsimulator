@@ -9,11 +9,17 @@ public class PlayerManager : MonoBehaviour
     // Reference to the Build Cam Camera (used in Build Mode)
     public GameObject buildCamCamera;
 
+    public GameObject golfCamCamera;
+
     // Reference to the BuildingSystem component
     public BuildingSystem buildingSystem; // Assign this in the Inspector
 
     // Boolean to track the current mode
     private bool isInBuildMode = false;
+
+    private bool isInGolfMode = false;
+
+
 
     [SerializeField] private float money = 0f; // Private backing field for Money
     public float Money // Property to manage Money with updates
@@ -55,6 +61,11 @@ public class PlayerManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.B))
         {
             ToggleMode();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && isInGolfMode)
+        {
+            GolfModeToggle();
         }
     }
 
@@ -143,5 +154,18 @@ public class PlayerManager : MonoBehaviour
     public void SubtractMoney(float amount)
     {
         Money -= amount; // Use the property to trigger the update
+    }
+
+    public void GolfModeToggle()
+    {
+        if (playerGameObject != null)
+        {
+            isInGolfMode = !isInGolfMode;
+            golfCamCamera.SetActive(isInGolfMode);
+            Debug.Log("WE ARE IN " + isInGolfMode);
+            SetCursorState(isInGolfMode);
+            //buildingSystem.SetSelectMode(); // Deselect any plane
+            playerGameObject.SetActive(!isInGolfMode);
+        }
     }
 }

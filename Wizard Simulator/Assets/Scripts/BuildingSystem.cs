@@ -625,6 +625,12 @@ public class BuildingSystem : MonoBehaviour
         float playerMoney = GetPlayerResources();
         SetPlayerResources(playerMoney - placeableData.cost);
     }
+    void RefundMoney(PlaceableData placeableData)
+    {
+        // Replace with your resource management logic
+        float playerMoney = GetPlayerResources();
+        SetPlayerResources(playerMoney + placeableData.cost);
+    }
 
     void SetPlayerResources(float newMoneyValue)
     {
