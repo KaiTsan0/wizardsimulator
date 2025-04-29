@@ -7,6 +7,11 @@ public class PowerBar : MonoBehaviour
     private float powerValue = 0f;
     private bool increasing = true;
 
+    private void Start()
+    {
+        
+    }
+
     void Update()
     {
         if (Input.GetMouseButton(0)) // Mouse 1 held down
@@ -40,12 +45,13 @@ public class PowerBar : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0)) // Mouse 1 released
         {
-            Debug.Log($"Power applied: {powerValue}");
+            Debug.Log($"Power applied: {powerValue/100}");
             // Pass the power value to the golf ball controller
-            GolfBallController golfBallController = GetComponent<GolfBallController>();
+            GolfBallController golfBallController = FindObjectOfType<GolfBallController>();
             if (golfBallController != null)
             {
-                //golfBallController.ApplyForce(powerValue);
+                print("applied");
+                golfBallController.ApplyForce(powerValue);
             }
 
             // Reset the power bar

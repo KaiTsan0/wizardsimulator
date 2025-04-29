@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c123a5787261aa9498c4bc5e53ed41bb
+guid: 80785ae4ca27e57498417b6d549f6b78
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Fbx Default Material
-    second: {fileID: 2100000, guid: 413dc92da85ac8a4fae1408313c3b16c, type: 2}
+    second: {fileID: 2100000, guid: 5ebca9df500222d4f863467f3d407736, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -22,6 +22,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Glass_Opaq_Cracked
+    second: {fileID: 2100000, guid: c92c3efb3bde4ef4499b6c2e04cc0209, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Glass_Opaque
     second: {fileID: 2100000, guid: 443f183a305e7b843ac737d9abafe322, type: 2}
   - first:
@@ -29,6 +34,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Glass_Shards
     second: {fileID: 2100000, guid: a97648311f37c684397671d9fa16e091, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Road
+    second: {fileID: 2100000, guid: a50a59216f4ee3f4e91b6f30d63a87bb, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -52,11 +62,6 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: brick_wall_orange
-    second: {fileID: 2100000, guid: 8abbc1c3addb58a44908c3de4c0c9d4a, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
       name: brick_wall_red
     second: {fileID: 2100000, guid: d990540902a495544924cf72a9a02af7, type: 2}
   - first:
@@ -67,18 +72,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: cloth_awning_intact__default
+    second: {fileID: 2100000, guid: 09b76230638e2e74e8c7d84d8a96ea74, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: cloth_awning_torn__default
     second: {fileID: 2100000, guid: 9a6c0f586e8225f44bad4131990e3454, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: cloth_intact_clr_pckr_red
-    second: {fileID: 2100000, guid: 09b76230638e2e74e8c7d84d8a96ea74, type: 2}
+      name: concrete_trim
+    second: {fileID: 2100000, guid: 5ebca9df500222d4f863467f3d407736, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: concrete_trim
-    second: {fileID: 2100000, guid: 5ebca9df500222d4f863467f3d407736, type: 2}
+      name: concrete_trim_CLR_PKR
+    second: {fileID: 2100000, guid: 400055adb122d1e468c4f9fb11c56ed8, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -112,21 +122,6 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: metal_trim_clean___default
-    second: {fileID: 2100000, guid: ccdc81fd42020b945a5fc29bb13eda18, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: metal_trim_clean_blue
-    second: {fileID: 2100000, guid: 88e69bcdd1d79b24495c5290c3e16d15, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: metal_trim_clean_green
-    second: {fileID: 2100000, guid: b356c5c5d070a45499458ff62df6a2e7, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
       name: metal_trim_grey_glossy
     second: {fileID: 2100000, guid: 961a41b5a32cf8c468ab3b97a5bd76b8, type: 2}
   - first:
@@ -142,33 +137,33 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: t_alpha_white
+    second: {fileID: 2100000, guid: ec498939c54ca0447b7bc6ecbdaede45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: tile_trim___default
     second: {fileID: 2100000, guid: ed1c84a3e139d804d877b445e1424d4a, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: tile_trim_clean___default
-    second: {fileID: 2100000, guid: f9dd1a484ad942846a58c99ed7aa006c, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tile_trim_clean_color_blue
-    second: {fileID: 2100000, guid: c42b585e759d5ad47b9b699dcc6acdef, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: tile_trim_clean_color_red
+      name: tile_trim_color_red
     second: {fileID: 2100000, guid: 64e8c23d0ad7292469f7fa674fb18bef, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: tile_trim_clean_color_white
+      name: tile_trim_color_white
     second: {fileID: 2100000, guid: 48dccdde9212b2c4f8fbc3a6494cfb21, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: trash_pile
     second: {fileID: 2100000, guid: a7f37c86097ee384db107af4c763be37, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: x_alpha_yellow
+    second: {fileID: 2100000, guid: 963d4a7b7c220ef41a5fceb159b2ee07, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -208,8 +203,8 @@ ModelImporter:
     importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
-    importCameras: 1
-    importLights: 1
+    importCameras: 0
+    importLights: 0
     nodeNameCollisionStrategy: 1
     fileIdsGeneration: 2
     swapUVChannels: 0
@@ -255,7 +250,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.01
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
